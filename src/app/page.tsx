@@ -50,7 +50,7 @@ export default function Home() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>Loading UTD Academy...</p>;
 
   return (
     <div>

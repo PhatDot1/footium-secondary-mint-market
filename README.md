@@ -1,3 +1,19 @@
+## Schematics
+
+Cant exactly store priv key in smart contract so the current idea will be:
+
+Smart Contract:
+1. Receive funds from the user.
+2. Validate and allocate the dynamic mint price and extra amount??
+3. Emit some event to notify your backend of valid txn???
+
+Backend:
+1. Listen for validated event
+2. Run Mint script
+3. Wait for the minting transaction to confirm and transfer minted NFT to the user.
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

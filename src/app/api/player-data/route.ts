@@ -82,7 +82,7 @@ async function getPlayerData(playerId: string) {
 
     // Override divValue if rarity is "Rare"
     if (player.rarity === "Rare") {
-      divisionValue = "0.182 ETH";
+      divisionValue = "0.202 ETH";
     }
 
     return {
