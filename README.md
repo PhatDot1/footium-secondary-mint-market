@@ -6,6 +6,7 @@ Smart Contract:
 1. Receive funds from the user.
 2. Validate and allocate the dynamic mint price and extra amount??
 3. Emit some event to notify your backend of valid txn???
+N. Allow withdrawls: Make sure my wallet can wirthdraw funds from the contract.  
 
 Backend:
 1. Listen for validated event

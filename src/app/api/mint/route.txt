@@ -1,0 +1,41 @@
+const { ethers } = require("ethers");
+require("dotenv").config();
+
+// Set up provider and wallet
+const provider = new ethers.providers.JsonRpcProvider(process.env.ARBITRUM_RPC_URL);
+const privateKey = process.env.LOW_DIV_PRIV_KEY; // Private key for minting wallet
+const wallet = new ethers.Wallet(privateKey, provider);
+
+// Contract details
+const fundsHandlerAddress = "YOUR_FUNDS_HANDLER_CONTRACT_ADDRESS";
+const mintingContractAddress = "YOUR_MINTING_CONTRACT_ADDRESS";
+const fundsHandlerABI = [/* ABI of MintFundsHandler */];
+const mintingContractABI = [/* ABI of Minting Contract */];
+
+const fundsHandler = new ethers.Contract(fundsHandlerAddress, fundsHandlerABI, wallet);
+const mintingContract = new ethers.Contract(mintingContractAddress, mintingContractABI, wallet);
+
+// Listen for FundsValidated events
+fundsHandler.on(
+    "FundsValidated",
+    async (user, amountSent, mintPrice, playerId, clubId, recipient) => {
+        console.log(`Funds received from ${user}. Processing mint...`);
+
+        try {
+            // Call mintPlayer on the minting contract
+            const mintTx = await mintingContract.mintPlayer(clubId, playerId, [], {
+                value: ethers.utils.parseEther(mintPrice.toString()),
+                gasLimit: 300000,
+            });
+            const mintReceipt = await mintTx.wait();
+            console.log(`Mint successful: ${mintReceipt.transactionHash}`);
+
+            // Transfer NFT to recipient
+            const transferTx = await mintingContract.transferFrom(wallet.address, recipient, clubId);
+            const transferReceipt = await transferTx.wait();
+            console.log(`NFT transferred to ${recipient}: ${transferReceipt.transactionHash}`);
+        } catch (error) {
+            console.error("Error during minting or transfer:", error);
+        }
+    }
+);
