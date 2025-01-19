@@ -8,10 +8,16 @@ Smart Contract:
 3. Emit some event to notify your backend of valid txn???
 N. Allow withdrawls: Make sure my wallet can wirthdraw funds from the contract.  
 
+Frontend: 
+Trigger backend API route when user enters page.
+
 Backend:
 1. Listen for validated event
 2. Run Mint script
 3. Wait for the minting transaction to confirm and transfer minted NFT to the user.
+
+Other:
+blockchain event indexing service to persist events even when your backend is down.
 
 
 
