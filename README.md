@@ -1,23 +1,24 @@
+## TODO
+
+Frontend: 
+Frontend wallet integration and contract integration to pay to mint from academy
+
+Backend:
+1. Test backend locally
+2. Mint and transfer API route hosted on digital ocean where it can run with full uptime.
+
+Low div pages.
+
 ## Schematics
 
 Cant exactly store priv key in smart contract so the current idea will be:
 
 Smart Contract:
-1. Receive funds from the user.
-2. Validate and allocate the dynamic mint price and extra amount??
-3. Emit some event to notify your backend of valid txn???
-N. Allow withdrawls: Make sure my wallet can wirthdraw funds from the contract.  
+Test withdrawls: Make sure my wallet can wirthdraw funds from the contract.  
 
-Frontend: 
-Trigger backend API route when user enters page.
 
-Backend:
-1. Listen for validated event
-2. Run Mint script
-3. Wait for the minting transaction to confirm and transfer minted NFT to the user.
-
-Other:
-blockchain event indexing service to persist events even when your backend is down.
+Other?
+blockchain event indexing service to persist events even when backend is down.
 
 
 

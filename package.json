@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "run-ts": "ts-node src/app/api/mint/test-backend.ts" 
+    "run-ts": "ts-node src/app/api/mint/test-backend.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.12.6",
+    "@metamask/sdk": "^0.31.5",
     "apollo-client": "^2.6.10",
     "axios": "^1.7.9",
     "ethers": "^6.13.5",
@@ -28,7 +29,7 @@
     "eslint-config-next": "15.1.4",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5",
-    "ts-node": "^10.9.1" 
+    "ts-node": "^10.9.1",
+    "typescript": "^5"
   }
 }

@@ -1,3 +1,4 @@
+// ran on a dedicated digital ocean droplet.
 import { ethers, Interface } from "ethers";
 import { parseEther, JsonRpcProvider } from "ethers";
 import axios from "axios";
