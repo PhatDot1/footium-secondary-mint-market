@@ -105,10 +105,14 @@ export default function Home() {
       const recipient = account; // User's wallet address
   
       // Initialize MetaMask provider and signer using Web3Provider (standard for MetaMask interaction)
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-  
-      // Set up the contract instance with ABI and contract address
+      if (!ethereum) {
+        alert("MetaMask is not available. Please install MetaMask!");
+        return;
+      }
+      
+      const provider = new BrowserProvider(ethereum);
+      const signer = await provider.getSigner();
+
       const contract = new ethers.Contract(
         "0xF164FD933606D0F8b2361ebC0083843FD9177faB", // Contract address
         abi,
