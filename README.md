@@ -1,8 +1,9 @@
 ## TODO
 
 Frontend: 
-Frontend wallet integration and contract integration to pay to mint from academy
-FIX METAMASK INTERACTION WITH CONTRACT!
+1. Fix metamask SDK and current interaction with contract
+2. Try different approach for wallet integration [@rainbow-me/rainbowkit and wagmi]
+3. Try with replacing contract integration with sending TXN with relevant data
 
 Change player-data api route query to:
 query {
