@@ -8,7 +8,7 @@ Change player-data api route query to:
 query {
   players(
     where: {
-      clubId: { equals: {clubID} }
+      clubId: { equals: {ClubID} }
       isReserve: { equals: false }
       isAcademy: { equals: true }
     }
@@ -17,8 +17,10 @@ query {
     imageUrls {
       card
     }
+    mintPrice
   }
 }
+[Parse to only show those with 6-XXX-X]
 
 Backend:
 1. Test backend locally
