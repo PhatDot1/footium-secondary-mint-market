@@ -1,9 +1,34 @@
 "use client";
 
+import type { MetaMaskInpageProvider } from "@metamask/providers";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { MetaMaskSDK } from "@metamask/sdk";
 import axios from "axios";
+
+
+const abi = [
+  "function receiveFunds(uint256 mintPrice, uint256 clubId, string calldata playerId, address recipient) external payable",
+];
+
+interface Window {
+  ethereum?: any;
+}
+declare global {
+  interface Window {
+    ethereum?: MetaMaskInpageProvider;
+  }
+}
+
+type ReceiveFundsFunction = (
+  mintPrice: ethers.BigNumberish,
+  clubId: number,
+  playerId: string,
+  recipient: string,
+  overrides: { value: ethers.BigNumberish; gasLimit?: ethers.BigNumberish }
+) => Promise<ethers.TransactionResponse>;
+
+
 
 type Player = {
   id: string;
@@ -22,7 +47,9 @@ const MMSDK = new MetaMaskSDK({
   },
 });
 
-const ethereum = MMSDK.getProvider();
+const ethereum = MMSDK.getProvider() || window.ethereum;
+
+
 
 export default function Home() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -58,57 +85,80 @@ export default function Home() {
     }
   };
 
+
   const handleMint = async (player: Player) => {
     if (!account) {
       alert("Please connect your wallet first!");
       return;
     }
   
-    // Define mint price mapping
     const MINT_PRICE_MAPPING: Record<string, string> = {
       Div1: "0.0980",
       Div2: "0.0713",
       Div3: "0.0401",
       Div4: "0.0241",
-      Div5: "0.0216",  // actually 0.0143 but temp set to 0.0216 for testing
+      Div5: "0.0143",
       Div6: "0.0103",
       Div7: "0.0063",
       Div8: "0.0034",
     };
   
     try {
-      // Determine the mint price
+      // Calculate mint price
       const mintPrice = player.rarity === "Rare"
         ? ethers.parseEther("0.154") // Override for rare players
         : ethers.parseEther(MINT_PRICE_MAPPING[player.div.replace("Div", "")] || "0");
   
       // Extract player parameters
-      const clubId = parseInt(player.id.split("-")[1]); // Extract clubId from playerId
-      const playerId = player.id;
-      const recipient = account;
+      const clubId = parseInt(player.id.split("-")[1]); // Club ID extracted from Player ID
+      const playerId = player.id; // Full Player ID
+      const recipient = account; // User's wallet address
   
-      // Initialize provider and contract
+      // Initialize MetaMask provider and signer
       const provider = new ethers.BrowserProvider(ethereum as any);
       const signer = await provider.getSigner();
   
-      const contractAddress = "0xF164FD933606D0F8b2361ebC0083843FD9177faB";
-      const abi = [
-        "function receiveFunds(uint256 mintPrice, uint256 clubId, string playerId, address recipient) external payable",
-      ];
-      const contract = new ethers.Contract(contractAddress, abi, signer);
+      // Encode ABI function call manually
+      const iface = new ethers.Interface(abi);
+      const data = iface.encodeFunctionData("receiveFunds", [
+        mintPrice,
+        clubId,
+        playerId,
+        recipient,
+      ]);
   
-      // Send the transaction
-      const tx = await contract.receiveFunds(mintPrice, clubId, playerId, recipient, {
-        value: mintPrice, // Pass the mint price as msg.value
-      });
+      // Build transaction object
+      const txRequest = {
+        to: "0xF164FD933606D0F8b2361ebC0083843FD9177faB",
+        value: mintPrice, // Mint price in ETH
+        data, // Encoded function call
+        gasLimit: 600000, // Gas limit
+      };
   
-      await tx.wait();
-      alert(`Mint successful! Transaction Hash: ${tx.hash}`);
-    } catch (error) {
+      console.log("Transaction request:", txRequest);
+  
+      // Send transaction through MetaMask
+      const txResponse = await signer.sendTransaction(txRequest);
+  
+      console.log(`Transaction sent! Hash: ${txResponse.hash}`);
+  
+      // Wait for confirmation
+      const receipt = await txResponse.wait();
+      console.log("Transaction confirmed:", receipt);
+  
+      alert(`Mint successful! Transaction Hash: ${txResponse.hash}`);
+    } catch (error: any) {
       console.error("Error minting player:", error);
-      alert("Mint failed. Check console for details.");
+      alert(`Mint failed: ${error.message || error}`);
     }
   };
+  
+  
+  
+
+  
+  
+  
   
 
   if (loading) return <p>Loading UTD Academy...</p>;

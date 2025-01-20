@@ -2,6 +2,23 @@
 
 Frontend: 
 Frontend wallet integration and contract integration to pay to mint from academy
+FIX METAMASK INTERACTION WITH CONTRACT!
+
+Change player-data api route query to:
+query {
+  players(
+    where: {
+      clubId: { equals: {clubID} }
+      isReserve: { equals: false }
+      isAcademy: { equals: true }
+    }
+  ) {
+    id
+    imageUrls {
+      card
+    }
+  }
+}
 
 Backend:
 1. Test backend locally
