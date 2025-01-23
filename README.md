@@ -1,27 +1,10 @@
 ## TODO
 
 Frontend: 
-1. Fix metamask SDK and current interaction with contract
-2. Try different approach for wallet integration [@rainbow-me/rainbowkit and wagmi]
-3. Try with replacing contract integration with sending TXN with relevant data
+1. ADD POSITIONS THROUGH TO FRONT END SO THEY CAN BE ADDED AS FILTER CONDITIONS!
+2. ROBUST SWITCH WALLET FEATURE
+3. BEFORE BUY TRIGGERS WALLET TO SIGN TXN, ADD ERROR HANDLING AND BACKEND CHECK TO VERIFY PLAYER HASNT BEEN MINTED SINCE PAGE WAS RENDERED
 
-Change player-data api route query to:
-query {
-  players(
-    where: {
-      clubId: { equals: {ClubID} }
-      isReserve: { equals: false }
-      isAcademy: { equals: true }
-    }
-  ) {
-    id
-    imageUrls {
-      card
-    }
-    mintPrice
-  }
-}
-[Parse to only show those with 6-XXX-X]
 
 Backend:
 1. Test backend locally

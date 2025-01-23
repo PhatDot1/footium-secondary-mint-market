@@ -1,0 +1,212 @@
+:root {
+    --chakra-colors-background-light: #ffffff;
+    --chakra-fontWeights-semibold: 600;
+    --chakra-sizes-10: 2.5rem;
+    --chakra-sizes-12: 3rem;
+    --chakra-fontSizes-sm: 0.875rem;
+    --chakra-space-5: 1.25rem;
+    --chakra-space-4: 1rem;
+    --chakra-space-3: 0.75rem;
+    --chakra-space-2: 0.5rem;
+    --chakra-space-1: 0.25rem;
+    --chakra-space-6: 1.5rem;
+    --chakra-space-8: 2rem;
+    --chakra-colors-grey-grey6: #2d3748;
+    --chakra-colors-grey-grey12: #4a5568;
+    --chakra-radii-full: 9999px;
+  }
+  
+  body {
+    font-family: "Sora", sans-serif;
+    background-color: #0a0a0a;
+    color: white;
+  }
+  
+  .header {
+    display: flex;
+    background: #0a0a0a;
+    padding: var(--chakra-space-3) var(--chakra-space-4);
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #272727;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: var(--chakra-space-3);
+  }
+  
+  .button {
+    display: flex;
+    appearance: none;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    position: relative;
+    white-space: nowrap;
+    vertical-align: middle;
+    outline: transparent solid 2px;
+    outline-offset: 2px;
+    line-height: 1.2;
+    border-radius: 8px;
+    font-weight: var(--chakra-fontWeights-semibold);
+    color: var(--chakra-colors-background-light);
+    transition: background 0.3s;
+    height: var(--chakra-sizes-10);
+    min-width: var(--chakra-sizes-10);
+    font-size: var(--chakra-fontSizes-sm);
+    padding-inline-start: var(--chakra-space-5);
+    padding-inline-end: var(--chakra-space-5);
+    text-transform: uppercase;
+    min-height: var(--chakra-sizes-10);
+    background: linear-gradient(rgb(62, 77, 229) 0%, rgb(40, 53, 186) 100%);
+    box-shadow: rgb(86, 101, 255) 0px 1px 0px inset;
+  }
+  
+  .wallet-button {
+    display: flex;
+    appearance: none;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    outline: transparent solid 2px;
+    outline-offset: 2px;
+    color: var(--chakra-colors-background-light);
+    transition: background 0.3s;
+    font-size: var(--chakra-fontSizes-sm);
+    padding: 0 var(--chakra-space-4);
+    text-transform: none;
+    min-height: var(--chakra-sizes-10);
+    background: linear-gradient(rgb(69, 69, 69) 0%, rgb(39, 39, 39) 100%);
+    box-shadow: rgba(173, 170, 170, 0.25) 0px 1px 0px inset;
+    border-radius: var(--chakra-radii-full);
+    font-family: "Sora", sans-serif;
+    cursor: pointer;
+  }
+  
+  .wallet-button:hover {
+    background: linear-gradient(rgb(79, 79, 79) 0%, rgb(49, 49, 49) 100%);
+  }
+  
+  .wallet-button svg {
+    width: 24px;
+    height: 24px;
+    margin-right: 0;
+    flex-shrink: 0;
+  }
+  
+  .wallet-button .balance,
+  .wallet-button .account {
+    display: none;
+    padding-inline-start: var(--chakra-space-1);
+    padding-inline-end: var(--chakra-space-1);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.57;
+  }
+  
+  .wallet-button .balance {
+    color: #414ddd;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .wallet-button .account {
+    color: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .player-card {
+    background: #1d1d1d;
+  }
+  
+  .player-card img {
+    transition: transform 0.3s ease;
+  }
+  
+  .player-card img:hover {
+    transform: scale(1.05);
+  }
+  
+  .disconnect-icon {
+    width: 20px;
+    height: 20px;
+    color: white;
+    margin-left: 5px;
+  }
+  
+  .filter-container {
+    background-color: #1a1a1a;
+    padding: var(--chakra-space-6);
+    border-radius: 12px;
+    margin-bottom: var(--chakra-space-8);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filter-button {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border: none;
+    padding: var(--chakra-space-2) var(--chakra-space-4);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .filter-button:hover {
+    background-color: #3d3d3d;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(65, 77, 221, 0.3);
+  }
+  
+  .filter-button.active {
+    background-color: #414ddd;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(65, 77, 221, 0.5);
+  }
+  
+  .filter-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(65, 77, 221, 0.5);
+  }
+  
+  @media screen and (min-width: 769px) {
+    .wallet-button .balance,
+    .wallet-button .account {
+      display: block;
+      width: auto;
+      max-width: 83px;
+    }
+  }
+  
+  @media screen and (min-width: 1025px) {
+    .wallet-button {
+      min-height: var(--chakra-sizes-12);
+    }
+  
+    .wallet-button .balance,
+    .wallet-button .account {
+      max-width: 112px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+  }
+  
+  @media screen and (max-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+  }
+  
+  
