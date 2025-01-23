@@ -1,13 +1,34 @@
 "use client";
 
+import type { MetaMaskInpageProvider } from "@metamask/providers";
 import { useEffect, useState } from "react";
-import { ethers, BrowserProvider, parseEther } from "ethers";
-import Web3Modal from "web3modal";
+import { ethers } from "ethers";
+import { MetaMaskSDK } from "@metamask/sdk";
 import axios from "axios";
+
 
 const abi = [
   "function receiveFunds(uint256 mintPrice, uint256 clubId, string calldata playerId, address recipient) external payable",
 ];
+
+interface Window {
+  ethereum?: any;
+}
+declare global {
+  interface Window {
+    ethereum?: MetaMaskInpageProvider;
+  }
+}
+
+type ReceiveFundsFunction = (
+  mintPrice: ethers.BigNumberish,
+  clubId: number,
+  playerId: string,
+  recipient: string,
+  overrides: { value: ethers.BigNumberish; gasLimit?: ethers.BigNumberish }
+) => Promise<ethers.TransactionResponse>;
+
+
 
 type Player = {
   id: string;
@@ -15,15 +36,25 @@ type Player = {
   leadership: number;
   stamina: number;
   div: string;
-  divValue: string; // ETH value displayed on the frontend
+  divValue: string;
   rarity: string;
 };
+
+const MMSDK = new MetaMaskSDK({
+  dappMetadata: {
+    name: "Footium Dapp",
+    url: window.location.href,
+  },
+});
+
+const ethereum = MMSDK.getProvider() || window.ethereum;
+
+
 
 export default function Home() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [account, setAccount] = useState<string | null>(null);
-  const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -46,95 +77,91 @@ export default function Home() {
 
   const connectWallet = async () => {
     try {
-      const web3Modal = new Web3Modal();
-      const instance = await web3Modal.connect();
-      const web3Provider = new BrowserProvider(instance);
-      const signer = await web3Provider.getSigner();
-      const userAccount = await signer.getAddress();
-
-      setProvider(web3Provider);
-      setAccount(userAccount);
-
-      console.log("Connected account:", userAccount);
+      const accounts = await MMSDK.connect();
+      setAccount(accounts[0]);
+      console.log("Connected account:", accounts[0]);
     } catch (error) {
       console.error("Error connecting wallet:", error);
     }
   };
 
-  const handleBuy = async (player: Player) => {
-    if (!account || !provider) {
+
+  const handleMint = async (player: Player) => {
+    if (!account) {
       alert("Please connect your wallet first!");
       return;
     }
-
+  
     const MINT_PRICE_MAPPING: Record<string, string> = {
-      div1: "0.0128",
-      div2: "0.0112",
-      div3: "0.0096",
-      div4: "0.0080",
-      div5: "0.0064",
-      div6: "0.0048",
-      div7: "0.0032",
-      div8: "0.0024",
+      Div1: "0.0980",
+      Div2: "0.0713",
+      Div3: "0.0401",
+      Div4: "0.0241",
+      Div5: "0.0143",
+      Div6: "0.0103",
+      Div7: "0.0063",
+      Div8: "0.0034",
     };
-
+  
     try {
-      // Parse mint price (parameter) and value (transaction amount)
-      const mintPrice = parseEther(
-        player.rarity === "Rare" ? "0.0180" : MINT_PRICE_MAPPING[player.div.toLowerCase()]
-      ); // Mint price parameter
-      const value = parseEther(player.divValue); // Total value sent in the transaction
-
+      // Calculate mint price
+      const mintPrice = player.rarity === "Rare"
+        ? ethers.parseEther("0.154") // Override for rare players
+        : ethers.parseEther(MINT_PRICE_MAPPING[player.div.replace("Div", "")] || "0");
+  
       // Extract player parameters
-      const clubId = parseInt(player.id.split("-")[1]); // Club ID
+      const clubId = parseInt(player.id.split("-")[1]); // Club ID extracted from Player ID
       const playerId = player.id; // Full Player ID
       const recipient = account; // User's wallet address
-
-      // Log the parameters before sending the transaction
-      console.log("Attempting to mint with the following parameters:");
-      console.log({
-        mintPrice: ethers.formatEther(mintPrice), // Parameter only (no 'ETH' text)
-        value: ethers.formatEther(value), // ETH value sent (no 'ETH' text)
+  
+      // Encode dynamic data
+      const dynamicData = JSON.stringify({
+        mintPrice: mintPrice.toString(),
         clubId,
         playerId,
         recipient,
       });
-
-      // Get contract instance
-      const contractAddress = "0xF164FD933606D0F8b2361ebC0083843FD9177faB";
+  
+      // Convert to UTF-8 bytes and then to a hex string
+      const data = ethers.hexlify(ethers.toUtf8Bytes(dynamicData));
+  
+      // Initialize MetaMask provider and signer
+      const provider = new ethers.BrowserProvider(ethereum as any);
       const signer = await provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, abi, signer);
-
-      // Send the transaction
-      const tx = await contract.receiveFunds(mintPrice, clubId, playerId, recipient, {
-        value, // Total value to send (in ETH)
-        gasLimit: 300000, // Adjust gas limit as needed
-      });
-
-      console.log(`Transaction sent! Hash: ${tx.hash}`);
-
+  
+      // Build transaction object
+      const txRequest = {
+        to: "0xF164FD933606D0F8b2361ebC0083843FD9177faB", // Replace with your payment receiver address
+        value: mintPrice, // Mint price in ETH
+        data, // Encoded data as hex string
+        gasLimit: 21000 + data.length * 68, // Adjusted for the size of the data payload
+      };
+  
+      console.log("Transaction request:", txRequest);
+  
+      // Send transaction through MetaMask
+      const txResponse = await signer.sendTransaction(txRequest);
+  
+      console.log(`Transaction sent! Hash: ${txResponse.hash}`);
+  
       // Wait for confirmation
-      const receipt = await tx.wait();
+      const receipt = await txResponse.wait();
       console.log("Transaction confirmed:", receipt);
-
-      alert(`Transaction successful! Transaction Hash: ${tx.hash}`);
+  
+      alert(`Payment successful! Transaction Hash: ${txResponse.hash}`);
     } catch (error: any) {
-      console.error("Error processing the transaction:", error);
-
-      // Log the exact error details
-      alert(
-        `Transaction failed:\n\nParameters:\nMint Price (parameter): ${
-          ethers.formatEther(
-            player.rarity === "Rare" ? parseEther("0.0180") : parseEther(MINT_PRICE_MAPPING[player.div.toLowerCase()])
-          )
-        }\nValue Sent: ${ethers.formatEther(parseEther(player.divValue))}\nClub ID: ${
-          player.id.split("-")[1]
-        }\nPlayer ID: ${player.id}\nRecipient: ${account}\n\nError Message: ${
-          error.message || error
-        }`
-      );
+      console.error("Error processing payment:", error);
+      alert(`Payment failed: ${error.message || error}`);
     }
   };
+  
+  
+  
+
+  
+  
+  
+  
 
   if (loading) return <p>Loading UTD Academy...</p>;
 
@@ -192,13 +219,13 @@ export default function Home() {
               <strong>Division:</strong> {player.div}
             </p>
             <p>
-              <strong>Value:</strong> {player.divValue} ETH
+              <strong>Value:</strong> {player.divValue}
             </p>
             <p>
               <strong>Rarity:</strong> {player.rarity}
             </p>
             <button
-              onClick={() => handleBuy(player)}
+              onClick={() => handleMint(player)}
               style={{
                 display: "block",
                 margin: "16px auto 0",
@@ -211,7 +238,7 @@ export default function Home() {
                 cursor: "pointer",
               }}
             >
-              Buy
+              Mint
             </button>
           </div>
         ))}

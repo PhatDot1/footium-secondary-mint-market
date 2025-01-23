@@ -3,6 +3,25 @@ import axios from "axios";
 
 const GRAPHQL_ENDPOINT = "https://live.api.footium.club/api/graphql";
 const OPENSEA_API_ENDPOINT = "https://api.opensea.io/api/v2/chain/arbitrum/account/{wallet_address}/nfts";
+const COLLECTION_SLUG = "footium-clubs";
+
+// Type definition for the player
+interface Player {
+  id: string;
+  imageUrls: {
+    card: string;
+  };
+  mintPrice: number;
+  rarity?: string;
+  playerAttributes?: {
+    leadership: number;
+    stamina: number;
+  };
+  club?: {
+    id: number;
+    name: string;
+  };
+}
 
 const DIVISION_MAPPING: Record<number | string, string> = {
   28: "div3",
@@ -31,17 +50,17 @@ const DIVISION_MAPPING: Record<number | string, string> = {
   "div8": "0.0055 ETH",
 };
 
-async function getNftTokenIds(apiKey: string, walletAddress: string, collectionSlug: string) {
+async function getNftTokenIds(apiKey: string, walletAddress: string) {
   const url = OPENSEA_API_ENDPOINT.replace("{wallet_address}", walletAddress);
   const headers = {
     accept: "application/json",
     "x-api-key": apiKey,
   };
-  const params = { collection: collectionSlug, limit: 200 };
+  const params = { collection: COLLECTION_SLUG, limit: 200 };
 
   try {
     const response = await axios.get(url, { headers, params });
-    return response.data?.nfts?.map((nft: any) => nft.identifier) || [];
+    return response.data?.nfts || [];
   } catch (error) {
     console.error("Error fetching NFTs:", error);
     return [];
@@ -58,7 +77,7 @@ async function getPlayersByClubId(clubId: number) {
           isAcademy: { equals: true }
         }
         orderBy: { id: desc }
-        take: 1
+        take: 10
       ) {
         id
         imageUrls {
@@ -134,29 +153,32 @@ async function getPlayerDetails(playerId: string) {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const walletAddress = url.searchParams.get("walletAddress");
-  const collectionSlug = url.searchParams.get("collectionSlug");
   const apiKey = process.env.OPENSEA_API_KEY;
 
-  if (!walletAddress || !collectionSlug || !apiKey) {
+  if (!walletAddress || !apiKey) {
     return NextResponse.json({ error: "Missing parameters or API key" }, { status: 400 });
   }
 
-  const nftTokenIds = await getNftTokenIds(apiKey, walletAddress, collectionSlug);
+  // Fetch the NFTs owned by the wallet address
+  const nftData = await getNftTokenIds(apiKey, walletAddress);
   const allPlayerData = [];
 
-  for (const tokenId of nftTokenIds) {
-    const clubId = parseInt(tokenId.split("-")[1]); // Extract clubId from tokenId
+  for (const nft of nftData) {
+    const clubId = parseInt(nft.identifier); // Using the NFT's identifier as the club ID
 
     // Step 1: Get players by clubId
-    const playersByClub = await getPlayersByClubId(clubId);
+    const playersByClub: Player[] = await getPlayersByClubId(clubId);
 
-    // Step 2: Fetch full details for each player
-    for (const player of playersByClub) {
+    // Step 2: Filter players and keep the ones with the highest player ID (based on the format x-yab-z)
+    const highestIdPlayers = playersByClub.filter((player) => player.id.startsWith("6"));
+    
+    // Step 3: Fetch full details for each player
+    for (const player of highestIdPlayers) {
       const playerDetails = await getPlayerDetails(player.id);
       if (playerDetails) {
         allPlayerData.push({
           ...playerDetails,
-          card: player.card, // Keep image URL from the club query
+          card: player.imageUrls?.card, // Keep image URL from the club query
           mintPrice: player.mintPrice, // Include mintPrice for backend use
         });
       }
