@@ -98,59 +98,131 @@ export default function Home() {
     }
   }
 
+
+
+
+
   const handleBuy = async (player: Player) => {
     if (!account || !provider) {
-      alert("Please connect your wallet first!")
-      return
+      alert("Please connect your wallet first!");
+      return;
     }
-
+  
     const MINT_PRICE_MAPPING: Record<string, string> = {
-      div1: "0.0128",
-      div2: "0.0112",
-      div3: "0.0096",
-      div4: "0.0080",
-      div5: "0.0064",
-      div6: "0.0048",
-      div7: "0.0032",
-      div8: "0.0024",
-    }
-
+      div1: "0.0980",
+      div2: "0.0713",
+      div3: "0.0401",
+      div4: "0.0241",
+      div5: "0.0143",
+      div6: "0.0103",
+      div7: "0.0063",
+      div8: "0.0034",
+    };
+  
     try {
-      const mintPrice = parseEther(player.rarity === "Rare" ? "0.0180" : MINT_PRICE_MAPPING[player.div.toLowerCase()])
-      const value = parseEther(player.divValue)
-
-      const clubId = Number.parseInt(player.id.split("-")[1])
-      const playerId = player.id
-      const recipient = account
-
-      console.log("Attempting to mint with the following parameters:", {
-        mintPrice: ethers.formatEther(mintPrice),
-        value: ethers.formatEther(value),
-        clubId,
-        playerId,
-        recipient,
-      })
-
-      const contractAddress = "0xF164FD933606D0F8b2361ebC0083843FD9177faB"
-      const signer = await provider.getSigner()
-      const contract = new ethers.Contract(contractAddress, abi, signer)
-
+      const mintPrice = parseEther(player.rarity === "Rare" ? "0.154" : MINT_PRICE_MAPPING[player.div.toLowerCase()]);
+      const value = parseEther(player.divValue);
+  
+      const clubId = Number.parseInt(player.id.split("-")[1]);
+      const playerId = player.id;
+      const recipient = account;
+  
+      // Display initial popup
+      const popup = document.createElement("div");
+      popup.className = "popup-overlay";
+      popup.innerHTML = `
+        <div class="popup">
+          <p>Verifying Transaction...</p>
+          <div class="loader"></div>
+        </div>
+      `;
+      document.body.appendChild(popup);
+  
+      const contractAddress = "0xF164FD933606D0F8b2361ebC0083843FD9177faB";
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+  
+      // Step 1: User signs and sends the transaction
       const tx = await contract.receiveFunds(mintPrice, clubId, playerId, recipient, {
         value,
         gasLimit: 300000,
-      })
-
-      console.log(`Transaction sent! Hash: ${tx.hash}`)
-
-      const receipt = await tx.wait()
-      console.log("Transaction confirmed:", receipt)
-
-      alert(`Transaction successful! Transaction Hash: ${tx.hash}`)
+      });
+  
+      console.log(`Transaction sent! Hash: ${tx.hash}`);
+      popup.innerHTML = `
+        <div class="popup">
+          <p>Transaction sent! Hash: ${tx.hash}</p>
+          <p>Waiting for confirmation...</p>
+          <div class="loader"></div>
+        </div>
+      `;
+  
+      const receipt = await tx.wait();
+      console.log("Transaction confirmed:", receipt);
+  
+      // Step 2: Backend API call
+      popup.innerHTML = `
+        <div class="popup">
+          <p>Processing on backend...</p>
+          <div class="loader"></div>
+        </div>
+      `;
+  
+      const backendParams = {
+        user: account,
+        txHash: tx.hash,
+        amountSent: ethers.formatEther(value),
+        mintPrice: ethers.formatEther(mintPrice),
+        playerId,
+        clubId,
+        recipient,
+        div: player.div,
+        rarity: player.rarity,
+      };
+  
+      console.log("Sending data to backend:", backendParams);
+  
+      const response = await axios.post("/api/mint", backendParams);
+  
+      console.log("Backend response:", response.data);
+  
+      if (response.data.error) {
+        popup.innerHTML = `
+          <div class="popup">
+            <p>Error: ${response.data.error}</p>
+            <button onclick="document.body.removeChild(this.parentNode.parentNode)">Close</button>
+          </div>
+        `;
+        return;
+      }
+  
+      // Step 3: Show transfer status
+      popup.innerHTML = `
+        <div class="popup">
+          <p>Transferring Academy Player to your wallet...</p>
+          <div class="loader"></div>
+        </div>
+      `;
+  
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate transfer delay for UI
+  
+      // Step 4: Completion message
+      popup.innerHTML = `
+        <div class="popup">
+          <p>Process complete!</p>
+          <button onclick="document.body.removeChild(this.parentNode.parentNode)">Close</button>
+        </div>
+      `;
     } catch (error: any) {
-      console.error("Error processing the transaction:", error)
-      alert(`Transaction failed: ${error.message || error}`)
+      console.error("Error processing the transaction:", error);
+      alert(`Transaction failed: ${error.message || error}`);
     }
-  }
+  };
+  
+
+
+
+
 
   const rarities = Array.from(new Set(players.map((player) => player.rarity)))
 
@@ -172,7 +244,7 @@ export default function Home() {
               </linearGradient>
             </defs>
           </svg>
-          <h1 className="text-white text-2xl font-bold">Footium Players</h1>
+          <h1 className="text-white text-2xl font-bold">Academy Players</h1>
         </div>
         {!account ? (
           <button className="button" onClick={connectWallet}>

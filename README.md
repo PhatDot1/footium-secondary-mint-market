@@ -10,6 +10,8 @@ Backend:
 1. Test backend locally
 2. Mint and transfer API route hosted on digital ocean where it can run with full uptime.
 
+X. ALT METHOD: Have signing of TXN trigger backend: Backend verifies txn parameters on chain are as required and triggers user pop up with two steps and loading showing: 'Verifying TXN On-Chain', 'Minting Player', and 'Transferring Player'.
+
 Low div pages.
 
 ## Schematics
