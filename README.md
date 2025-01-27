@@ -1,18 +1,13 @@
 ## TODO
 
+Potential issue: Simultaneous TXN's
+
 Frontend: 
-1. ADD POSITIONS THROUGH TO FRONT END SO THEY CAN BE ADDED AS FILTER CONDITIONS!
-2. ROBUST SWITCH WALLET FEATURE
-3. BEFORE BUY TRIGGERS WALLET TO SIGN TXN, ADD ERROR HANDLING AND BACKEND CHECK TO VERIFY PLAYER HASNT BEEN MINTED SINCE PAGE WAS RENDERED
+1. BEFORE BUY TRIGGERS WALLET TO SIGN TXN, ADD ERROR HANDLING AND BACKEND CHECK TO VERIFY PLAYER HASNT BEEN MINTED SINCE PAGE WAS RENDERED
+2. ROBUST SWITCH WALLET FEATURE? Not too important - can just switch in metamask...
 
 
-Backend:
-1. Test backend locally
-2. Mint and transfer API route hosted on digital ocean where it can run with full uptime.
 
-X. ALT METHOD: Have signing of TXN trigger backend: Backend verifies txn parameters on chain are as required and triggers user pop up with two steps and loading showing: 'Verifying TXN On-Chain', 'Minting Player', and 'Transferring Player'.
-
-Low div pages.
 
 ## Schematics
 

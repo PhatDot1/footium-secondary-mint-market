@@ -30,6 +30,7 @@ export default function Home() {
   const [balance, setBalance] = useState<string | null>(null)
   const [web3Modal, setWeb3Modal] = useState<Web3Modal | null>(null)
   const [selectedRarity, setSelectedRarity] = useState<string | null>(null)
+  const [purchasedPlayers, setPurchasedPlayers] = useState<string[]>([])
 
   useEffect(() => {
     const newWeb3Modal = new Web3Modal()
@@ -56,12 +57,15 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedRarity) {
-      const filtered = players.filter((player) => player.rarity === selectedRarity)
+      const filtered = players.filter(
+        (player) => player.rarity === selectedRarity && !purchasedPlayers.includes(player.id),
+      )
       setFilteredPlayers(filtered)
     } else {
-      setFilteredPlayers(players)
+      const filtered = players.filter((player) => !purchasedPlayers.includes(player.id))
+      setFilteredPlayers(filtered)
     }
-  }, [selectedRarity, players])
+  }, [selectedRarity, players, purchasedPlayers])
 
   const connectWallet = async () => {
     try {
@@ -98,16 +102,12 @@ export default function Home() {
     }
   }
 
-
-
-
-
   const handleBuy = async (player: Player) => {
     if (!account || !provider) {
-      alert("Please connect your wallet first!");
-      return;
+      alert("Please connect your wallet first!")
+      return
     }
-  
+
     const MINT_PRICE_MAPPING: Record<string, string> = {
       div1: "0.0980",
       div2: "0.0713",
@@ -117,57 +117,57 @@ export default function Home() {
       div6: "0.0103",
       div7: "0.0063",
       div8: "0.0034",
-    };
-  
+    }
+
     try {
-      const mintPrice = parseEther(player.rarity === "Rare" ? "0.154" : MINT_PRICE_MAPPING[player.div.toLowerCase()]);
-      const value = parseEther(player.divValue);
-  
-      const clubId = Number.parseInt(player.id.split("-")[1]);
-      const playerId = player.id;
-      const recipient = account;
-  
+      const mintPrice = parseEther(player.rarity === "Rare" ? "0.154" : MINT_PRICE_MAPPING[player.div.toLowerCase()])
+      const value = parseEther(player.divValue)
+
+      const clubId = Number.parseInt(player.id.split("-")[1])
+      const playerId = player.id
+      const recipient = account
+
       // Display initial popup
-      const popup = document.createElement("div");
-      popup.className = "popup-overlay";
+      const popup = document.createElement("div")
+      popup.className = "popup-overlay"
       popup.innerHTML = `
-        <div class="popup">
+        <div class="popup dark-popup">
           <p>Verifying Transaction...</p>
           <div class="loader"></div>
         </div>
-      `;
-      document.body.appendChild(popup);
-  
-      const contractAddress = "0xF164FD933606D0F8b2361ebC0083843FD9177faB";
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, abi, signer);
-  
+      `
+      document.body.appendChild(popup)
+
+      const contractAddress = "0xF164FD933606D0F8b2361ebC0083843FD9177faB"
+      const signer = await provider.getSigner()
+      const contract = new ethers.Contract(contractAddress, abi, signer)
+
       // Step 1: User signs and sends the transaction
       const tx = await contract.receiveFunds(mintPrice, clubId, playerId, recipient, {
         value,
         gasLimit: 300000,
-      });
-  
-      console.log(`Transaction sent! Hash: ${tx.hash}`);
+      })
+
+      console.log(`Transaction sent! Hash: ${tx.hash}`)
       popup.innerHTML = `
-        <div class="popup">
+        <div class="popup dark-popup">
           <p>Transaction sent! Hash: ${tx.hash}</p>
           <p>Waiting for confirmation...</p>
           <div class="loader"></div>
         </div>
-      `;
-  
-      const receipt = await tx.wait();
-      console.log("Transaction confirmed:", receipt);
-  
+      `
+
+      const receipt = await tx.wait()
+      console.log("Transaction confirmed:", receipt)
+
       // Step 2: Backend API call
       popup.innerHTML = `
-        <div class="popup">
+        <div class="popup dark-popup">
           <p>Processing on backend...</p>
           <div class="loader"></div>
         </div>
-      `;
-  
+      `
+
       const backendParams = {
         user: account,
         txHash: tx.hash,
@@ -178,55 +178,59 @@ export default function Home() {
         recipient,
         div: player.div,
         rarity: player.rarity,
-      };
-  
-      console.log("Sending data to backend:", backendParams);
-  
-      const response = await axios.post("/api/mint", backendParams);
-  
-      console.log("Backend response:", response.data);
-  
+      }
+
+      console.log("Sending data to backend:", backendParams)
+
+      const response = await axios.post("/api/mint", backendParams)
+
+      console.log("Backend response:", response.data)
+
       if (response.data.error) {
         popup.innerHTML = `
-          <div class="popup">
+          <div class="popup dark-popup">
             <p>Error: ${response.data.error}</p>
             <button onclick="document.body.removeChild(this.parentNode.parentNode)">Close</button>
           </div>
-        `;
-        return;
+        `
+        return
       }
-  
+
       // Step 3: Show transfer status
       popup.innerHTML = `
-        <div class="popup">
+        <div class="popup dark-popup">
           <p>Transferring Academy Player to your wallet...</p>
           <div class="loader"></div>
         </div>
-      `;
-  
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate transfer delay for UI
-  
+      `
+
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate transfer delay for UI
+
       // Step 4: Completion message
       popup.innerHTML = `
-        <div class="popup">
+        <div class="popup dark-popup">
           <p>Process complete!</p>
           <button onclick="document.body.removeChild(this.parentNode.parentNode)">Close</button>
         </div>
-      `;
+      `
+
+      // Add the purchased player to the state
+      setPurchasedPlayers((prev) => [...prev, player.id])
     } catch (error: any) {
-      console.error("Error processing the transaction:", error);
-      alert(`Transaction failed: ${error.message || error}`);
+      console.error("Error processing the transaction:", error)
+      alert(`Transaction failed: ${error.message || error}`)
     }
-  };
-  
-
-
-
-
+  }
 
   const rarities = Array.from(new Set(players.map((player) => player.rarity)))
 
-  if (loading) return <p className="text-white">Loading UTD Academy...</p>
+  if (loading)
+    return (
+      <div className="loading-container">
+        <p className="loading-text">Loading UTD Academy...</p>
+        <div className="loading-spinner"></div>
+      </div>
+    )
 
   return (
     <div className="min-h-screen">
