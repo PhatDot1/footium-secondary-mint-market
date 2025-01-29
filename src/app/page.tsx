@@ -145,7 +145,7 @@ export default function Home() {
       // Step 1: User signs and sends the transaction
       const tx = await contract.receiveFunds(mintPrice, clubId, playerId, recipient, {
         value,
-        gasLimit: 300000,
+        gasLimit: 4000000,
       })
 
       console.log(`Transaction sent! Hash: ${tx.hash}`)

@@ -131,7 +131,7 @@ export async function POST(req: Request) {
     // Step 3: Send mint transaction
     const mintTx = await mintContract.mintPlayer(clubId, playerId, mintProof, {
       value: parseEther(mintPrice),
-      gasLimit: 1000000,
+      gasLimit: 4000000,
     });
 
     let receipt = null;
