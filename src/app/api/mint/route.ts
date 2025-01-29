@@ -66,7 +66,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function POST(req: Request) {
   const body = await req.json();
   console.log("Received data from frontend:", body);
-  const { user, txHash, amountSent, mintPrice, playerId, clubId, recipient, div, rarity } = body;
+  const { txHash, amountSent, mintPrice, playerId, clubId, recipient, div, rarity } = body;
 
   const provider = new JsonRpcProvider(RPC_URL);
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
@@ -165,9 +165,14 @@ export async function POST(req: Request) {
     await transferTx.wait();
 
     return NextResponse.json({ message: "Mint and transfer successful", tokenId });
-  } catch (error: any) {
-    console.error("Error during mint process:", error);
-    return NextResponse.json({ error: error.message || "Transaction failed" }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Error during mint process:", error);
+      return NextResponse.json({ error: error.message || "Transaction failed" }, { status: 500 });
+    } else {
+      console.error("Unknown error during mint process:", error);
+      return NextResponse.json({ error: "Transaction failed" }, { status: 500 });
+    }
   }
 }
 
@@ -190,8 +195,8 @@ async function fetchMerkleProof(playerId: string) {
   }
 }
 
-// Helper: Decode event logs
-async function decodeEventLogs(transactionHash: string, abi: any) {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function decodeEventLogs(transactionHash: string, abi: any) { // NEED TO FIX THIS FROM ANY TO RUN WORKING BUILD
   try {
     const provider = new ethers.JsonRpcProvider(RPC_URL);
     const receipt = await provider.getTransactionReceipt(transactionHash);
@@ -219,3 +224,4 @@ async function decodeEventLogs(transactionHash: string, abi: any) {
     return null;
   }
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */

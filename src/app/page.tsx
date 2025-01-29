@@ -216,10 +216,15 @@ export default function Home() {
 
       // Add the purchased player to the state
       setPurchasedPlayers((prev) => [...prev, player.id])
-    } catch (error: any) {
-      console.error("Error processing the transaction:", error)
-      alert(`Transaction failed: ${error.message || error}`)
-    }
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error("Error processing the transaction:", error.message)
+    alert(`Transaction failed: ${error.message}`)
+  } else {
+    console.error("An unknown error occurred:", error)
+    alert("Transaction failed: Unknown error")
+  }
+}
   }
 
   const rarities = Array.from(new Set(players.map((player) => player.rarity)))
