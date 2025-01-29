@@ -42,6 +42,7 @@ const DIVISION_MAPPING: Record<number | string, string> = {
   2690: "div6",
   2939: "div7",
   565: "div8",
+  63: "div4",
   "div1": "0.0120",
   "div2": "0.0900",
   "div3": "0.0502",
