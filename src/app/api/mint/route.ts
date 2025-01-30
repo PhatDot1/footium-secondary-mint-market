@@ -52,11 +52,11 @@ const DIVISION_MAPPING: Record<string, bigint> = { // my personal selected div p
   div1: ethers.parseEther("0.120"),
   div2: ethers.parseEther("0.0900"),
   div3: ethers.parseEther("0.0502"),
-  div4: ethers.parseEther("0.0292"), 
-  div5: ethers.parseEther("0.0173"),
-  div6: ethers.parseEther("0.0123"),
-  div7: ethers.parseEther("0.0080"),
-  div8: ethers.parseEther("0.0055"),
+  div4: ethers.parseEther("0.0282"), 
+  div5: ethers.parseEther("0.0170"),
+  div6: ethers.parseEther("0.0121"),
+  div7: ethers.parseEther("0.0075"),
+  div8: ethers.parseEther("0.0045"),
 };
 
 // Delay function to compensate for slow network

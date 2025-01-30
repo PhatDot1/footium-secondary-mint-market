@@ -46,11 +46,11 @@ const DIVISION_MAPPING: Record<number | string, string> = {
   "div1": "0.0120",
   "div2": "0.0900",
   "div3": "0.0502",
-  "div4": "0.0292",
-  "div5": "0.0173",
-  "div6": "0.0123",
-  "div7": "0.0080",
-  "div8": "0.0055",
+  "div4": "0.0282",
+  "div5": "0.0170",
+  "div6": "0.0121",
+  "div7": "0.0075",
+  "div8": "0.0045",
 };
 
 async function getNftTokenIds(apiKey: string, walletAddress: string) {

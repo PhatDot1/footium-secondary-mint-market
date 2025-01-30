@@ -253,7 +253,7 @@ export default function Home() {
               </linearGradient>
             </defs>
           </svg>
-          <h1 className="text-white text-2xl font-bold">Academy Players</h1>
+          <h1 className="text-white text-2xl font-bold">Academy Market</h1>
         </div>
         {!account ? (
           <button className="button" onClick={connectWallet}>
@@ -325,7 +325,7 @@ export default function Home() {
                   <p className="font-semibold">{player.leadership} Leadership</p>
                   <p className="font-semibold">{player.stamina} Stamina</p>
                 </div>
-                <p className="text-center">Value: {player.divValue} ETH</p>
+                <p className="text-center">Price: {player.divValue} ETH</p>
                 <button className="button mt-4 w-full" onClick={() => handleBuy(player)}>
                   Buy
                 </button>
